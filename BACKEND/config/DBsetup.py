@@ -33,7 +33,7 @@ databaseEngine = create_engine(
 
 # Create missing database tables.
 def createDatabaseTables():
-    from models.user import User
+    from models.user import PasswordResetCode, User
 
     # Create tables that do not already exist.
     databaseInspector = inspect(databaseEngine)

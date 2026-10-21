@@ -1,18 +1,19 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+/**
+ * WHAT: Configure navigation and global application providers.
+ * WHY: Make Redux state available to every Expo Router screen.
+ * HOW: Wrap the root navigation stack with React Redux Provider.
+ * IMPORTANT: Keep global providers at the root of the application.
+ */
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { Stack } from "expo-router";
+import { Provider } from "react-redux";
 
-SplashScreen.preventAutoHideAsync();
+import { reduxStore } from "@/useRedux/store";
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <Provider store={reduxStore}>
+      <Stack />
+    </Provider>
   );
 }

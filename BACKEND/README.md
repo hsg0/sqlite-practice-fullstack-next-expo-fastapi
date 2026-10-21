@@ -5,7 +5,7 @@
 Set a private key for signing login cookies, then start the API from `BACKEND/`:
 
 ```bash
-export JWT_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export JWT_SECRET="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 uv run uvicorn main:app --reload --port 4020
 ```
 
@@ -15,10 +15,17 @@ the API over HTTPS.
 
 ## User authentication
 
-- `POST /api/users/register` accepts `{"username": "sunny", "password": "a-long-password"}`.
-- `POST /api/users/login` accepts the same fields and sets a 30-minute, HTTP-only JWT cookie.
-- `POST /api/users/logout` clears the login cookie.
-- `GET /api/users/profile` returns the logged-in user's ID and username.
+- `POST /api/users/register` accepts a username, email, and password.
+- `POST /api/users/login` accepts an email, password, and `clientType` of `web` or `mobile`.
+- Web login stores the JWT in an HTTP-only cookie.
+- Mobile login returns the JWT as `accessToken` for Expo SecureStore.
+- `POST /api/users/logout` clears the web login cookie.
+- `GET /api/users/me` accepts the web cookie or a mobile Bearer token.
 
-Passwords are stored as salted PBKDF2 hashes. Email and password-reset endpoints
-are not used in this simple username-and-password flow.
+Passwords are stored as salted bcrypt hashes. Mobile clients send the saved JWT
+as `Authorization: Bearer <accessToken>` when calling protected endpoints.
+
+`clientType` selects how the token is returned; it does not prove that a request
+came from a native app. Expo logs out locally with
+`SecureStore.deleteItemAsync("accessToken")`. Clearing either the cookie or the
+SecureStore item does not revoke the JWT, which remains valid until it expires.

@@ -1,6 +1,6 @@
 """
-WHAT: Define the users table and account request data.
-WHY: Store accounts and validate registration and login input.
+WHAT: Define user and password reset database tables.
+WHY: Store accounts and short-lived recovery records.
 HOW: Use SQLModel for SQLite and Pydantic validation.
 IMPORTANT: The stored password value must always be a hash.
 """
@@ -27,6 +27,22 @@ class User(SQLModel, table=True):
     passwordHash: str = Field(
         sa_column=Column("password", String, nullable=False),
     )
+
+
+# Store one short-lived password reset attempt.
+class PasswordResetCode(SQLModel, table=True):
+    __tablename__ = "passwordResetCodes"
+
+    id: str = Field(
+        default_factory=lambda: str(nanoID.uuid4()),
+        sa_column=Column("_id", String, primary_key=True),
+    )
+    email: str = Field(index=True)
+    codeDigest: str
+    resetTokenDigest: str | None = None
+    createdAt: int
+    expiresAt: int
+    failedAttempts: int = 0
 
 
 class UserCredentials(SQLModel):
